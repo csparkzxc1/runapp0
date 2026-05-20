@@ -42,18 +42,43 @@ HealthKit 권한이 안 받아지면 `ios/macaron.entitlements`에 HealthKit이 
 
 ## 동작 확인 (Done 체크리스트)
 
+### 코드 레벨 (CI에서 자동 검증)
+
+- [x] **1000/5000/10000보, 10층 마일스톤 보상 정확** — `npm test` (jest, 15 케이스)
+- [x] **중복 적립 방지 로직** — jest dedup 케이스 + `supabase/test-schema.sh` 의 upsert 테스트
+- [x] **`daily_activity` 1행 누적** — schema 테스트의 upsert + unique constraint 검증
+- [x] **DB 스키마 (FK/check/RLS/trigger) 정확** — `supabase/test-schema.sh` 의 5개 assertion
+- [x] **타입 안전성** — `npm run typecheck`
+- [x] **린트/포맷** — `npm run lint` + `npm run format:check`
+
+### 실기기 레벨 (Mac에서 직접 확인)
+
 - [ ] Expo 빌드 + 실기기 실행
 - [ ] HealthKit 권한 요청 화면 작동
 - [ ] 오늘 걸음수 표시 (iPhone Health 앱과 일치)
 - [ ] 오늘 계단 층수 표시
-- [ ] 1000보 넘으면 +1 마카롱 적립
-- [ ] 5000보 넘으면 +2 추가 (총 +3)
-- [ ] 10000보 넘으면 +5 추가 (총 +8)
-- [ ] 10층 넘으면 +1 추가
-- [ ] 중복 적립 방지 (같은 날 새로고침해도 1회만)
-- [ ] Supabase `daily_activity` 1행 누적 저장
+- [ ] 실제로 1000보/5000보/10000보 적립
+- [ ] 실제로 10층 적립
+- [ ] 새로고침해도 중복 적립 안 됨 (실기기 + 실 Supabase)
 - [ ] `profiles.macaron_balance` 누적
 - [ ] `profiles.lifetime_steps` 누적 (등급업 준비)
+
+## 개발 명령어
+
+```bash
+npm run typecheck     # tsc --noEmit
+npm run lint          # eslint
+npm run format        # prettier --write
+npm run format:check  # CI에서 쓰는 검사 모드
+npm test              # jest (마카롱 마일스톤 단위 테스트)
+npm test -- --watch   # watch 모드
+```
+
+스키마 테스트 (로컬 Postgres 필요):
+
+```bash
+sudo -u postgres bash supabase/test-schema.sh
+```
 
 ## 폴더 구조
 
@@ -72,6 +97,9 @@ src/
   types/index.ts      # DB row 타입
 supabase/
   schema.sql         # 한번에 실행하는 DB 스키마
+  test-schema.sh     # 로컬 Postgres로 스키마/RLS/트리거 자동 검증
+.github/workflows/
+  ci.yml             # JS lint+typecheck+jest + Postgres 스키마 테스트
 ```
 
 ## Phase 1+로 미루는 것

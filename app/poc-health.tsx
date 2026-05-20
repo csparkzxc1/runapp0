@@ -62,20 +62,18 @@ export default function PoCHealth() {
       const previousSteps = existing?.steps ?? 0;
       const stepsDelta = Math.max(0, steps - previousSteps);
 
-      const { error: upsertErr } = await supabase
-        .from('daily_activity')
-        .upsert(
-          {
-            user_id: userId,
-            activity_date: date,
-            steps,
-            flights_climbed: flights,
-            distance_meters: distanceMeters,
-            macaron_earned: totalEarned,
-            milestones_granted: totalMilestones,
-          },
-          { onConflict: 'user_id,activity_date' },
-        );
+      const { error: upsertErr } = await supabase.from('daily_activity').upsert(
+        {
+          user_id: userId,
+          activity_date: date,
+          steps,
+          flights_climbed: flights,
+          distance_meters: distanceMeters,
+          macaron_earned: totalEarned,
+          milestones_granted: totalMilestones,
+        },
+        { onConflict: 'user_id,activity_date' },
+      );
       if (upsertErr) throw upsertErr;
 
       if (earned > 0 || stepsDelta > 0) {
@@ -162,7 +160,9 @@ export default function PoCHealth() {
           <>
             <Text>걸음: {health.data.steps.toLocaleString()}</Text>
             <Text>계단: {health.data.flights}층</Text>
-            <Text>거리: {(health.data.distanceMeters / 1000).toFixed(2)}km</Text>
+            <Text>
+              거리: {(health.data.distanceMeters / 1000).toFixed(2)}km
+            </Text>
           </>
         )}
       </View>
